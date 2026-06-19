@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎰 КАЗИНО v4.0</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',system-ui,sans-serif; }
+        body {
+            background: #0a0a12;
+            min-height:100vh;
+            display:flex;
+            justify-content:center;
+            padding:20px 10px;
+            color:#eee;
+        }
+        .app {
+            max-width:520px;
+            width:100%;
+            background:#12121f;
+            border-radius:28px;
+            padding:18px 14px 20px;
+            box-shadow:0 0 60px rgba(0,255,136,0.06);
+        }
+        .header {
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            flex-wrap:wrap;
+            gap:8px;
+            background:#1a1a2e;
+            padding:10px 14px;
+            border-radius:40px;
+            margin-bottom:14px;
+        }
+        .balance { font-weight:bold; font-size:1.2rem; background:#00ff8833; padding:2px 16px; border-radius:40px; border:1px solid #00ff8844; }
+        .balance span { color:#00ff88; }
+        .vip-badge { font-size:0.8rem; background:#ffd70022; padding:2px 12px; border-radius:40px; border:1px solid #ffd70044; }
+        .red-warning {
+            color:#ff2244;
+            font-weight:bold;
+            text-align:center;
+            font-size:0.75rem;
+            margin:4px 0 10px;
+            letter-spacing:0.3px;
+            border:1px solid #ff224455;
+            padding:4px 8px;
+            border-radius:40px;
+            background:#ff224411;
+        }
+        .tabs { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px; }
+        .tab {
+            background:#252540; border:none; color:#aaa; padding:6px 12px;
+            border-radius:40px; font-size:0.8rem; cursor:pointer; transition:0.2s;
+            flex:1 0 auto; text-align:center;
+        }
+        .tab.active { background:#00ff8833; color:#00ff88; border:1px solid #00ff8866; }
+        .panel {
+            background:#0d0d1a; border-radius:20px; padding:14px 12px;
+            min-height:240px; border:1px solid #1f1f3a;
+        }
+        .panel h3 { margin-bottom:10px; color:#00ff88; font-weight:400; letter-spacing:1px; }
+        .btn {
+            background:#2a2a4a; border:none; color:#fff; padding:8px 14px;
+            border-radius:40px; font-size:0.9rem; cursor:pointer; transition:0.15s;
+            touch-action:manipulation; margin:3px 1px;
+        }
+        .btn:active { transform:scale(0.95); background:#3a3a5a; }
+        .btn-green { background:#00cc77; color:#0a0a12; font-weight:bold; }
+        .btn-green:active { background:#00aa66; }
+        .btn-red { background:#cc3355; color:#fff; }
+        .btn-gold { background:#ffd700; color:#0a0a12; font-weight:bold; }
+        .input-row { display:flex; gap:8px; flex-wrap:wrap; margin:6px 0; align-items:center; }
+        .input-row input {
+            flex:1; padding:8px 12px; border-radius:40px; border:1px solid #2a2a4a;
+            background:#12121f; color:#fff; font-size:0.9rem; min-width:70px;
+        }
+        .input-row input:focus { outline:2px solid #00ff8866; border-color:#00ff88; }
+        .grid-4 { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin:6px 0; }
+        .cell {
+            background:#1a1a2e; padding:12px 4px; text-align:center; border-radius:14px;
+            font-size:1.2rem; cursor:pointer; border:1px solid #2a2a4a; transition:0.1s;
+        }
+        .cell:active { transform:scale(0.92); background:#2a2a4a; }
+        .cell.revealed { background:#00ff8822; border-color:#00ff8866; }
+        .cell.mine { background:#cc335566; border-color:#cc3355; }
+        .shop-item {
+            display:flex; justify-content:space-between; align-items:center;
+            background:#12121f; padding:6px 12px; border-radius:40px;
+            margin:3px 0; border:1px solid #1f1f3a;
+        }
+        .message {
+            background:#00ff8822; padding:8px 12px; border-radius:16px;
+            margin:8px 0; border-left:4px solid #00ff88; font-size:0.9rem;
+        }
+        .message.lose { background:#cc335522; border-color:#cc3355; }
+        .hidden { display:none; }
+        .mt-6 { margin-top:6px; }
+        .flex-between { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:4px; }
+        .bug-report {
+            position:fixed; bottom:10px; right:14px;
+            font-size:0.7rem; color:#888; background:#0a0a12cc;
+            padding:4px 10px; border-radius:30px;
+            border:1px solid #2a2a4a; z-index:999;
+        }
+        .bug-report a { color:#00cc77; text-decoration:none; }
+        .footer {
+            text-align:center; font-size:0.7rem; color:#555; margin-top:14px;
+            border-top:1px solid #1a1a2e; padding-top:10px;
+        }
+        .footer span { color:#00cc77; }
+        .auth-form { max-width:320px; margin:30px auto; }
+        .auth-form input { width:100%; margin:6px 0; }
+        .auth-form .btn { width:100%; }
+        .logout-btn { background:#cc335555; font-size:0.7rem; padding:2px 12px; border-radius:30px; cursor:pointer; border:1px solid #cc335566; }
+        .logout-btn:hover { background:#cc335588; }
+        .top-list { font-size:0.85rem; line-height:1.6; }
+        .top-list b { color:#ffd700; }
+        .admin-only { display:none; }
+        .auth-screen { display:block; }
+        .game-screen { display:none; }
+        .success-msg {
+            color:#00ff88;
+            background:#00ff8822;
+            padding:8px 14px;
+            border-radius:40px;
+            text-align:center;
+            margin-top:10px;
+            font-weight:bold;
+            border:1px solid #00ff8844;
+            opacity:0;
+            transition:0.3s;
+        }
+        .success-msg.show { opacity:1; }
+        .tournament-grid {
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:8px;
+            margin:8px 0;
+        }
+        .tournament-player {
+            background:#1a1a2e;
+            padding:8px 12px;
+            border-radius:14px;
+            border:1px solid #2a2a4a;
+            font-size:0.9rem;
+            display:flex;
+            justify-content:space-between;
+        }
+        .tournament-player.winner { border-color:#ffd700; background:#ffd70022; }
+        .tournament-player.loser { border-color:#cc3355; background:#cc335522; }
+        .roulette-circle {
+            width:200px;
+            height:200px;
+            border-radius:50%;
+            border:4px solid #ffd700;
+            margin:10px auto;
+            position:relative;
+            overflow:hidden;
+            background:conic-gradient(
+                red 0% 50%,
+                black 50% 100%
+            );
+        }
+        .roulette-pointer {
+            position:absolute;
+            top:-10px;
+            left:50%;
+            transform:translateX(-50%);
+            width:0;
+            height:0;
+            border-left:12px solid transparent;
+            border-right:12px solid transparent;
+            border-top:20px solid #ffd700;
+            z-index:10;
+            filter:drop-shadow(0 0 6px #ffd700aa);
+        }
+        .roulette-center {
+            position:absolute;
+            top:50%;
+            left:50%;
+            transform:translate(-50%,-50%);
+            width:30px;
+            height:30px;
+            border-radius:50%;
+            background:#1a1a2e;
+            border:3px solid #ffd700;
+            z-index:5;
+        }
+        .roulette-label {
+            position:absolute;
+            top:50%;
+            left:50%;
+            transform:translate(-50%,-50%);
+            color:#fff;
+            font-weight:bold;
+            font-size:0.8rem;
+            z-index:6;
+            text-shadow:0 0 8px #000;
+        }
+        @keyframes spinRoulette {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .cell.selected {
+            border-color: #00ff88;
+            background: #00ff8833;
+            box-shadow: 0 0 20px #00ff8866;
+        }
+    </style>
+</head>
+<body>
+<div class="app" id="app">
+
+    <div id="authScreen" class="auth-screen">
+        <h3 style="color:#00ff88;text-align:center;margin-bottom:12px;">🎰 КАЗИНО ТЕСТ</h3>
+        <div style="margin:6px 0;"><input type="text" id="authNick" placeholder="Никнейм" style="width:100%;padding:10px;border-radius:40px;border:1px solid #2a2a4a;background:#12121f;color:#fff;font-size:1rem;"></div>
+        <div style="margin:6px 0;"><input type="password" id="authPass" placeholder="Пароль" style="width:100%;padding:10px;border-radius:40px;border:1px solid #2a2a4a;background:#12121f;color:#fff;font-size:1rem;"></div>
+        <div style="display:flex;gap:8px;margin-top:10px;">
+            <button class="btn btn-green" id="authLoginBtn" style="flex:1;">Войти</button>
+            <button class="btn" id="authRegisterBtn" style="flex:1;">Регистрация</button>
+        </div>
+        <div id="authError" style="color:#ff3355;text-align:center;margin-top:8px;font-size:0.9rem;"></div>
+        <div id="authSuccess" class="success-msg">✅ Успешно зарегистрировано!</div>
+    </div>
+
+    <div id="gameScreen" class="game-screen">
+        <div class="header">
+            <div class="balance">💰 <span id="balanceDisplay">0</span></div>
+            <div class="vip-badge" id="vipBadge">⭐ Нет VIP</div>
+            <div class="logout-btn" id="logoutBtn">🚪 Выйти</div>
+        </div>
+        <div class="red-warning">🔴 ВАЛЮТА ИГРОВАЯ И НЕ КАК НЕ СВЯЗАНА С НАСТОЯЩИМИ ДЕНЬГАМИ</div>
+        <div class="tabs">
+            <button class="tab active" data-tab="tabGames">🎲 Игры</button>
+            <button class="tab" data-tab="tabShop">🛒 Магазин</button>
+            <button class="tab" data-tab="tabCases">📦 Кейсы</button>
+            <button class="tab admin-only" data-tab="tabAdmin" id="adminTabBtn">👑 Админ</button>
+            <button class="tab" data-tab="tabTop">🏆 Топ</button>
+            <button class="tab" data-tab="tabTournament">🏆 Турнир</button>
+        </div>
+        <div class="panel" id="tabGames"><div id="gameContent"><div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;"><button class="btn" data-game="rb">🎲 Красное/Чёрное</button><button class="btn" data-game="mines">💣 Мины</button><button class="btn" data-game="cards">🃏 Карты</button><button class="btn" data-game="slots">🎰 Слоты</button></div><div id="gameArea"><p style="color:#666;">Выберите игру</p></div></div></div>
+        <div class="panel hidden" id="tabShop"><h3>🛒 МАГАЗИН</h3><div id="shopList"></div></div>
+        <div class="panel hidden" id="tabCases"><h3>📦 КЕЙСЫ</h3><div id="casesList"></div><div id="caseResult" class="message mt-6 hidden"></div></div>
+        <div class="panel hidden admin-only" id="tabAdmin"><h3>👑 АДМИН-ПАНЕЛЬ</h3><div id="adminContent"></div></div>
+        <div class="panel hidden" id="tabTop"><h3>🏆 ТОП 10</h3><div id="topList" class="top-list"></div></div>
+        <div class="panel hidden" id="tabTournament"><h3>🏆 ТУРНИР «КОСТИ»</h3><div id="tournamentContent"></div></div>
+        <div id="globalMessage" class="message hidden"></div>
+        <div class="footer"><span>Разработчики: kiro + SWILL</span></div>
+    </div>
+</div>
+<div class="bug-report">🐞 Нашли баг? → <a href="https://t.me/kiro_terrorist" target="_blank">@kiro_terrorist</a></div>
+<script>
+const DB_KEY = 'casinoDB';
+function getDB() { try { return JSON.parse(localStorage.getItem(DB_KEY)) || {}; } catch { return {}; } }
+function saveDB(db) { localStorage.setItem(DB_KEY, JSON.stringify(db)); }
+function getUser(username) { const db = getDB(); return db[username] || null; }
+function setUser(username, data) { const db = getDB(); db[username] = data; saveDB(db); }
+function getAllUsers() { return getDB(); }
+
+function formatNumber(num) {
+    if (num >= 1000000) return (num / 1000000).toFixed(1) + 'м';
+    if (num >= 1000) return (num / 1000).toFixed(1) + 'к';
+    return String(num);
+}
+
+let currentUser = null;
+let currentData = null;
+let betAmount = 0;
+
+function loadSession() {
+    const saved = localStorage.getItem('casinoSession');
+    if (saved) {
+        const [username, password] = saved.split('||');
+        const user = getUser(username);
+        if (user && user.password === password) {
+            currentUser = username;
+            currentData = user;
+            return true;
+        }
+    }
+    return false;
+}
+function saveSession(username, password) { localStorage.setItem('casinoSession', username + '||' + password); }
+function clearSession() { localStorage.removeItem('casinoSession'); currentUser = null; currentData = null; }
+function saveCurrentUser() { if (currentUser && currentData) { setUser(currentUser, currentData); } }
+
+function showAuthScreen() {
+    document.getElementById('authScreen').style.display = 'block';
+    document.getElementById('gameScreen').style.display = 'none';
+}
+function showGameScreen() {
+    document.getElementById('authScreen').style.display = 'none';
+    document.getElementById('gameScreen').style.display = 'block';
+}
+function showSuccessMessage(text) {
+    const el = document.getElementById('authSuccess');
+    el.textContent = text;
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 5000);
+}
+
+document.getElementById('authLoginBtn').addEventListener('click', function() {
+    const nick = document.getElementById('authNick').value.trim();
+    const pass = document.getElementById('authPass').value.trim();
+    const err = document.getElementById('authError');
+    if (!nick || !pass) { err.textContent = 'Заполните все поля!'; return; }
+    const user = getUser(nick);
+    if (!user) { err.textContent = 'Пользователь не найден!'; return; }
+    if (user.password !== pass) { err.textContent = 'Неверный пароль!'; return; }
+    currentUser = nick;
+    currentData = user;
+    saveSession(nick, pass);
+    err.textContent = '';
+    showGameScreen();
+    renderApp();
+});
+
+document.getElementById('authRegisterBtn').addEventListener('click', function() {
+    const nick = document.getElementById('authNick').value.trim();
+    const pass = document.getElementById('authPass').value.trim();
+    const err = document.getElementById('authError');
+    if (!nick || !pass) { err.textContent = 'Заполните все поля!'; return; }
+    if (nick.length < 2) { err.textContent = 'Ник слишком короткий!'; return; }
+    if (pass.length < 3) { err.textContent = 'Пароль слишком короткий!'; return; }
+    if (getUser(nick)) { err.textContent = '❌ Этот ник уже занят!'; return; }
+    const isAdmin = (nick === 'kiro' && pass === 'kiro dodol');
+    const newUser = {
+        password: pass,
+        balance: 10000,
+        vip: 0,
+        inventory: [],
+        tickets: 0,
+        isAdmin: isAdmin,
+        stats: { bets: 0, wins: 0 }
+    };
+    setUser(nick, newUser);
+    currentUser = nick;
+    currentData = newUser;
+    saveSession(nick, pass);
+    err.textContent = '';
+    showSuccessMessage('✅ Успешно зарегистрировано!');
+    setTimeout(() => { showGameScreen(); renderApp(); }, 1500);
+});
+
+function renderApp() {
+    if (!currentUser || !currentData) { showAuthScreen(); return; }
+    showGameScreen();
+    updateUI();
+    renderShop();
+    renderCases();
+    renderAdmin();
+    renderTop();
+    renderTournament();
+    if (currentData.isAdmin) {
+        document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'block');
+    } else {
+        document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
+    }
+}
+
+function updateUI() {
+    if (!currentData) return;
+    document.getElementById('balanceDisplay').textContent = formatNumber(currentData.balance);
+    const vipNames = ['Нет VIP', '⭐ Silver VIP', '👑 Gold VIP'];
+    document.getElementById('vipBadge').textContent = vipNames[currentData.vip] || 'Нет VIP';
+    saveCurrentUser();
+    renderTop();
+}
+
+function showMessage(text, isLose = false) {
+    const el = document.getElementById('globalMessage');
+    el.textContent = text;
+    el.className = 'message' + (isLose ? ' lose' : '');
+    el.classList.remove('hidden');
+    setTimeout(() => el.classList.add('hidden'), 4000);
+}
+
+function updateBalance(amount) {
+    currentData.balance += amount;
+    if (currentData.balance < 0) currentData.balance = 0;
+    updateUI();
+}
+
+function getVipMultiplier() {
+    if (currentData.vip === 2) return 5;
+    if (currentData.vip === 1) return 3;
+    return 1;
+}
+
+function hasItem(item) { return currentData.inventory.includes(item); }
+function addItem(item) { if (!hasItem(item)) currentData.inventory.push(item); updateUI(); }
+function removeItem(item) { const i = currentData.inventory.indexOf(item); if (i>-1) currentData.inventory.splice(i,1); updateUI(); }
+
+document.querySelectorAll('.tab').forEach(btn => {
+    btn.addEventListener('click', function() {
+        document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        document.querySelectorAll('.panel').forEach(p => p.classList.add('hidden'));
+        document.getElementById(this.dataset.tab).classList.remove('hidden');
+    });
+});
+
+document.getElementById('logoutBtn').addEventListener('click', () => {
+    clearSession();
+    showAuthScreen();
+});
+
+const gameArea = document.getElementById('gameArea');
+function renderGame(name) {
+    if (name === 'rb') renderRB();
+    else if (name === 'mines') renderMines();
+    else if (name === 'cards') renderCards();
+    else if (name === 'slots') renderSlots();
+}
+
+// ============================================================
+//  КРАСНОЕ / ЧЁРНОЕ
+// ============================================================
+function renderRB() {
+    gameArea.innerHTML = `
+        <h3>🎲 Красное / Чёрное</h3>
+        <div class="input-row">
+            <input type="number" id="rbBet" placeholder="Ставка" value="100">
+            <button class="btn btn-green" id="rbBetBtn">Поставить</button>
+        </div>
+        <div style="display:flex; gap:12px; margin:6px 0;">
+            <button class="btn btn-red" data-rb="red">🔴 КРАСНОЕ</button>
+            <button class="btn" data-rb="black" style="background:#333;">⚫ ЧЁРНОЕ</button>
+        </div>
+        <div id="rbResult" class="message hidden"></div>
+        <div id="rbRoulette" style="display:none; text-align:center; margin-top:10px;">
+            <div class="roulette-circle" id="rouletteWheel">
+                <div class="roulette-pointer"></div>
+                <div class="roulette-center"></div>
+                <div class="roulette-label">🎰</div>
+            </div>
+            <div style="margin-top:6px; color:#888; font-size:0.8rem;">Крутится...</div>
+        </div>
+    `;
+    document.getElementById('rbBetBtn').addEventListener('click', () => {
+        const bet = parseInt(document.getElementById('rbBet').value) || 0;
+        if (bet <= 0 || bet > currentData.balance) return showMessage('❌ Ошибка ставки');
+        betAmount = bet;
+        showMessage(`✅ Ставка ${formatNumber(bet)} принята. Выберите цвет.`);
+    });
+    document.querySelectorAll('[data-rb]').forEach(btn => {
+        btn.addEventListener('click', function() {
+            if (betAmount <= 0) return showMessage('❌ Сначала сделайте ставку!');
+            const choice = this.dataset.rb;
+            const el = document.getElementById('rbRoulette');
+            el.style.display = 'block';
+            const wheel = document.getElementById('rouletteWheel');
+            let rotation = 0;
+            const interval = setInterval(() => {
+                rotation += 5 + Math.random() * 10;
+                wheel.style.transform = `rotate(${rotation}deg)`;
+            }, 50);
+            setTimeout(() => {
+                clearInterval(interval);
+                const result = Math.random() < 0.45 ? 'red' : 'black';
+                const win = choice === result;
+                const mult = getVipMultiplier();
+                const winAmount = win ? betAmount * 2 * mult : 0;
+                updateBalance(win ? winAmount : -betAmount);
+                const resEl = document.getElementById('rbResult');
+                resEl.className = 'message' + (win ? '' : ' lose');
+                resEl.innerHTML = `
+                    🎰 Выпало: <strong>${result === 'red' ? '🔴 КРАСНОЕ' : '⚫ ЧЁРНОЕ'}</strong><br>
+                    ${win ? `✅ ВЫИГРЫШ! +${formatNumber(winAmount)}` : `💀 ПРОИГРЫШ! -${formatNumber(betAmount)}`}
+                    ${mult > 1 ? ` (VIP x${mult})` : ''}
+                `;
+                resEl.classList.remove('hidden');
+                el.style.display = 'none';
+                betAmount = 0;
+            }, 10000);
+        });
+    });
+}
+
+// ============================================================
+//  МИНЫ
+// ============================================================
+let mines = null;
+let minesOpened = 0;
+let minesBet = 0;
+let minesActive = false;
+let minesEnded = false;
+let openedCells = new Set();
+
+function renderMines() {
+    if (mines === null) {
+        gameArea.innerHTML = `
+            <h3>💣 Мины (4×3)</h3>
+            <div class="input-row">
+                <input type="number" id="minesBetInput" placeholder="Ставка" value="100">
+                <button class="btn btn-green" id="minesStartBtn">💣 Начать</button>
+            </div>
+            <div id="minesBoard"></div>
+            <div id="minesMessage" class="message hidden"></div>
+            <button class="btn" id="minesResetBtn" style="margin-top:6px;">🔄 Сброс</button>
+        `;
+        document.getElementById('minesStartBtn').addEventListener('click', startMines);
+        document.getElementById('minesResetBtn').addEventListener('click', resetMines);
+        return;
+    }
+    renderMinesBoard();
+}
+
+function startMines() {
+    const bet = parseInt(document.getElementById('minesBetInput').value) || 0;
+    if (bet <= 0) { showMessage('❌ Ставка > 0', true); return; }
+    if (bet > currentData.balance) { showMessage(`❌ Не хватает! Баланс: ${formatNumber(currentData.balance)}`, true); return; }
+    updateBalance(-bet);
+    mines = Array(12).fill(0);
+    mines[Math.floor(Math.random() * 12)] = 1;
+    minesOpened = 0;
+    minesBet = bet;
+    minesActive = true;
+    minesEnded = false;
+    openedCells = new Set();
+    document.getElementById('minesStartBtn').disabled = true;
+    document.getElementById('minesBetInput').disabled = true;
+    renderMinesBoard();
+}
+
+function renderMinesBoard() {
+    const board = document.getElementById('minesBoard');
+    if (!board) return;
+    const opened = minesOpened;
+    const bet = minesBet;
+    const multiplier = 1 + (opened * 0.15);
+    const win = Math.floor(bet * multiplier);
+
+    let html = `<div class="info">
+        <span>Ставка: ${formatNumber(bet)}</span>
+        <span>Выигрыш: ${formatNumber(win)}</span>
+        <span>Открыто: ${opened}/11</span>
+    </div><div class="grid-4">`;
+
+    for (let i = 0; i < 12; i++) {
+        const isRevealed = openedCells.has(i);
+        const isMine = mines[i] === 1;
+        let symbol = '❓';
+        if (isRevealed && isMine) symbol = '💥';
+        else if (isRevealed && !isMine) symbol = '✅';
+        const cls = 'cell' + (isRevealed ? ' revealed' : '') + (isMine && isRevealed ? ' mine' : '');
+        html += `<div class="${cls}" data-idx="${i}">${symbol}</div>`;
+    }
+    html += `</div>`;
+
+    if (minesActive && opened > 0) {
+        html += `<button class="btn btn-green" id="minesTakeBtn" style="width:100%;margin-top:6px;">💰 Забрать ${formatNumber(win)}</button>`;
+    } else if (minesEnded) {
+        html += `<button class="btn" disabled style="width:100%;margin-top:6px;opacity:0.4;">💀 Игра завершена</button>`;
+    }
+
+    board.innerHTML = html;
+
+    if (minesActive) {
+        board.querySelectorAll('.cell:not(.revealed)').forEach(cell => {
+            cell.addEventListener('click', function() {
+                if (!minesActive) return;
+                const idx = parseInt(this.dataset.idx);
+                if (openedCells.has(idx)) return;
+                if (mines[idx] === 1) {
+                    openedCells.add(idx);
+                    minesActive = false;
+                    minesEnded = true;
+                    showMessage('💥 Мина! Проигрыш.', true);
+                    renderMinesBoard();
+                    document.getElementById('minesStartBtn').disabled = false;
+                    document.getElementById('minesBetInput').disabled = false;
+                    return;
+                }
+                openedCells.add(idx);
+                minesOpened++;
+                if (minesOpened === 11) {
+                    const totalWin = Math.floor(minesBet * (1 + 11 * 0.15));
+                    updateBalance(totalWin);
+                    minesActive = false;
+                    minesEnded = true;
+                    showMessage(`🎉 ВЫИГРЫШ! +${formatNumber(totalWin)}`);
+                    renderMinesBoard();
+                    document.getElementById('minesStartBtn').disabled = false;
+                    document.getElementById('minesBetInput').disabled = false;
+                    return;
+                }
+                renderMinesBoard();
+            });
+        });
+    }
+
+    const takeBtn = document.getElementById('minesTakeBtn');
+    if (takeBtn) {
+        takeBtn.addEventListener('click', function() {
+            if (!minesActive) return;
+            const totalWin = Math.floor(minesBet * (1 + minesOpened * 0.15));
+            updateBalance(totalWin);
+            minesActive = false;
+            minesEnded = true;
+            showMessage(`💰 Забрали ${formatNumber(totalWin)}`);
+            renderMinesBoard();
+            document.getElementById('minesStartBtn').disabled = false;
+            document.getElementById('minesBetInput').disabled = false;
+        });
+    }
+}
+
+function resetMines() {
+    mines = null;
+    minesOpened = 0;
+    minesBet = 0;
+    minesActive = false;
+    minesEnded = false;
+    openedCells = new Set();
+    document.getElementById('minesStartBtn').disabled = false;
+    document.getElementById('minesBetInput').disabled = false;
+    renderMines();
+}
+
+// ============================================================
+//  КАРТЫ
+// ============================================================
+let cardsBet = 0;
+let cardsCard = null;
+let cardsActive = false;
+
+function renderCards() {
+    gameArea.innerHTML = `
+        <h3>🃏 Карты</h3>
+        <div class="input-row">
+            <input type="number" id="cardsBet" placeholder="Ставка" value="100">
+            <button class="btn btn-green" id="cardsStartBtn">Начать</button>
+        </div>
+        <div id="cardsBoard"></div>
+    `;
+    document.getElementById('cardsStartBtn').addEventListener('click', () => {
+        const bet = parseInt(document.getElementById('cardsBet').value) || 0;
+        if (bet <= 0 || bet > currentData.balance) return showMessage('❌ Ошибка');
+        updateBalance(-bet);
+        cardsBet = bet;
+        cardsCard = Math.floor(Math.random() * 13) + 2;
+        cardsActive = true;
+        renderCardsBoard();
+    });
+}
+
+function renderCardsBoard() {
+    const board = document.getElementById('cardsBoard');
+    const names = {11:'Валет',12:'Дама',13:'Король',14:'Туз'};
+    const cardName = names[cardsCard] || cardsCard;
+    board.innerHTML = `
+        <div style="font-size:2.5rem;text-align:center;padding:8px;">🃏 ${cardName}</div>
+        <div style="display:flex;gap:12px;justify-content:center;">
+            <button class="btn" id="cardsHigher">⬆ СТАРШЕ</button>
+            <button class="btn" id="cardsLower">⬇ МЛАДШЕ</button>
+        </div>
+    `;
+    document.getElementById('cardsHigher').addEventListener('click', () => finishCards('higher'));
+    document.getElementById('cardsLower').addEventListener('click', () => finishCards('lower'));
+}
+
+function finishCards(choice) {
+    if (!cardsActive) return;
+    const newCard = Math.floor(Math.random() * 13) + 2;
+    const old = cardsCard;
+    const names = {11:'Валет',12:'Дама',13:'Король',14:'Туз'};
+    const oldName = names[old] || old;
+    const newName = names[newCard] || newCard;
+    const win = Math.random() < 0.45 && ((choice === 'higher' && newCard > old) || (choice === 'lower' && newCard < old));
+    const mult = getVipMultiplier();
+    if (win) {
+        const winAmount = cardsBet * 2 * mult;
+        updateBalance(winAmount);
+        showMessage(`🎉 ${oldName} → ${newName}! +${formatNumber(winAmount)}`);
+    } else if (newCard === old) {
+        updateBalance(cardsBet);
+        showMessage(`🤝 Ничья! ${oldName} → ${newName}. Возврат ${formatNumber(cardsBet)}`);
+    } else {
+        showMessage(`💀 ${oldName} → ${newName}. -${formatNumber(cardsBet)}`, true);
+    }
+    cardsActive = false;
+    renderCards();
+}
+
+// ============================================================
+//  СЛОТЫ
+// ============================================================
+function renderSlots() {
+    gameArea.innerHTML = `
+        <h3>🎰 Слоты</h3>
+        <div class="input-row">
+            <input type="number" id="slotsBet" placeholder="Ставка" value="100">
+            <button class="btn btn-green" id="slotsSpinBtn">🎰 Крутить</button>
+        </div>
+        <div id="slotsResult" class="message hidden"></div>
+        <div id="slotsBoard" style="font-size:2.5rem;text-align:center;padding:8px;"></div>
+    `;
+    document.getElementById('slotsSpinBtn').addEventListener('click', () => {
+        const bet = parseInt(document.getElementById('slotsBet').value) || 0;
+        if (bet <= 0 || bet > currentData.balance) return showMessage('❌ Ошибка');
+        updateBalance(-bet);
+        const sym = ['🍒','🍋','🍊','🍉','⭐','💎','7️⃣'];
+        const res = [sym[Math.floor(Math.random()*7)], sym[Math.floor(Math.random()*7)], sym[Math.floor(Math.random()*7)]];
+        document.getElementById('slotsBoard').innerHTML = `${res[0]} ${res[1]} ${res[2]}`;
+        const mult = getVipMultiplier();
+        let win = 0;
+        if (Math.random() < 0.35) {
+            if (res[0]===res[1] && res[1]===res[2]) win = bet * 5 * mult;
+            else if (res[0]===res[1] || res[1]===res[2] || res[0]===res[2]) win = bet * 2 * mult;
+        }
+        const el = document.getElementById('slotsResult');
+        el.className = 'message' + (win > 0 ? '' : ' lose');
+        if (win > 0) { updateBalance(win); el.innerHTML = `🎉 ВЫИГРЫШ! +${formatNumber(win)}`; }
+        else el.innerHTML = `💀 ПРОИГРЫШ! -${formatNumber(bet)}`;
+        el.classList.remove('hidden');
+    });
+}
+
+// ============================================================
+//  МАГАЗИН
+// ============================================================
+const shopItems = [
+    { name: '⭐ Silver VIP', price: 25000 },
+    { name: '👑 Gold VIP', price: 75000 },
+    { name: '🎨 Тема: Красная', price: 5000 },
+    { name: '🎨 Тема: Синяя', price: 5000 },
+    { name: '🎨 Тема: Зелёная', price: 5000 },
+];
+
+function renderShop() {
+    const list = document.getElementById('shopList');
+    if (!list) return;
+    list.innerHTML = shopItems.map(item => `
+        <div class="shop-item">
+            <span>${item.name} <span style="color:#888;">${formatNumber(item.price)} монет</span></span>
+            <button class="btn ${hasItem(item.name) ? 'btn' : 'btn-green'}" data-shop="${item.name}" ${hasItem(item.name) ? 'disabled style="opacity:0.5;"' : ''}>
+                ${hasItem(item.name) ? '✅ Куплено' : '🛒 Купить'}
+            </button>
+        </div>
+    `).join('');
+    list.querySelectorAll('[data-shop]').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const name = this.dataset.shop;
+            const item = shopItems.find(i => i.name === name);
+            if (!item || currentData.balance < item.price) return showMessage('❌ Не хватает!');
+            updateBalance(-item.price);
+            addItem(item.name);
+            if (item.name.includes('Gold')) currentData.vip = 2;
+            else if (item.name.includes('Silver')) currentData.vip = 1;
+            showMessage(`✅ Куплено: ${item.name}`);
+            renderShop();
+        });
+    });
+}
+
+// ============================================================
+//  КЕЙСЫ
+// ============================================================
+const casesData = [
+    { name: '🟢 Обычный кейс', price: 10000, items: ['💰 5000 монет', '💰 10000 монет', '🎨 Тема: Красная', '⭐ Silver VIP'] },
+    { name: '🔵 Средний кейс', price: 25000, items: ['💰 15000 монет', '👑 Gold VIP', '🎨 Тема: Синяя', '🎟️ Билет на легендарный кейс'] },
+    { name: '🟣 Элитный кейс', price: 75000, items: ['💰 50000 монет', '👑 Gold VIP', '⭐ Silver VIP', '🎟️ Билет на легендарный кейс'] },
+    { name: '🔴 Админ кейс', price: 0, items: ['👑 Gold VIP', '💰 200000 монет', '⭐ Silver VIP', '🎟️ Билет на легендарный кейс x3'] },
+    { name: '🎟️ Легендарный кейс', price: 0, items: ['👑 Gold VIP', '💰 250000 монет', '💰 500000 монет', '🎟️ Билет на легендарный кейс x2'] }
+];
+
+function renderCases() {
+    const list = document.getElementById('casesList');
+    if (!list) return;
+    const available = casesData.filter(c => {
+        if (c.name === '🔴 Админ кейс' && !currentData.isAdmin) return false;
+        if (c.name === '🎟️ Легендарный кейс') return currentData.tickets > 0;
+        return true;
+    });
+    list.innerHTML = available.map(c => `
+        <div class="shop-item">
+            <span>${c.name} <span style="color:#888;">${c.price > 0 ? formatNumber(c.price) + ' монет' : 'бесплатно'}</span></span>
+            <button class="btn btn-green" data-case="${c.name}" 
+                ${c.price > 0 && currentData.balance < c.price && c.name !== '🎟️ Легендарный кейс' ? 'disabled' : ''}>
+                📦 Открыть
+            </button>
+        </div>
+    `).join('');
+    list.querySelectorAll('[data-case]').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const name = this.dataset.case;
+            const data = casesData.find(c => c.name === name);
+            if (!data) return;
+            if (name === '🔴 Админ кейс' && !currentData.isAdmin) { return showMessage('❌ Только для админа!'); }
+            if (data.price > 0 && currentData.balance < data.price) { return showMessage('❌ Не хватает монет!'); }
+            if (name === '🎟️ Легендарный кейс') {
+                if (currentData.tickets < 1) return showMessage('❌ Нет билетов!');
+                currentData.tickets -= 1;
+            } else if (data.price > 0) { updateBalance(-data.price); }
+            const item = data.items[Math.floor(Math.random() * data.items.length)];
+            let msg = `🎉 Вы получили: ${item}`;
+            if (item.includes('монет')) {
+                const amount = parseInt(item.replace(/\D/g, '')) || 0;
+                updateBalance(amount);
+                msg += ` (+${formatNumber(amount)})`;
+            } else if (item.includes('Gold')) { currentData.vip = 2; addItem('👑 Gold VIP'); }
+            else if (item.includes('Silver')) { currentData.vip = 1; addItem('⭐ Silver VIP'); }
+            else if (item.includes('Билет')) { currentData.tickets += 1; msg += ' (билет добавлен)'; }
+            else addItem(item);
+            showMessage(msg);
+            renderCases();
+        });
+    });
+}
+
+// ============================================================
+//  АДМИНКА
+// ============================================================
+function renderAdmin() {
+    const container = document.getElementById('adminContent');
+    if (!currentData || !currentData.isAdmin) {
+        container.innerHTML = '<p style="color:#666;">Доступно только админу</p>';
+        return;
+    }
+    container.innerHTML = `
+        <div class="input-row">
+            <input type="text" id="adminNick" placeholder="Ник игрока">
+            <button class="btn btn-green" id="adminAddCoins">+ монет</button>
+        </div>
+        <div class="input-row">
+            <input type="number" id="adminAmount" placeholder="Сумма" value="1000">
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap; margin-top:6px;">
+            <button class="btn" id="adminVipSilver">💎 Silver VIP</button>
+            <button class="btn btn-gold" id="adminVipGold">👑 Gold VIP</button>
+            <button class="btn btn-red" id="adminCaseBtn">🔴 Админ кейс</button>
+            <button class="btn" id="adminTicketBtn">🎟️ +1 билет</button>
+            <button class="btn" id="adminHideBtn">👻 Скрыть из топа</button>
+            <button class="btn" id="adminShowBtn">👻 Показать в топе</button>
+        </div>
+        <div id="adminMsg" class="message mt-6 hidden"></div>
+    `;
+    document.getElementById('adminAddCoins').addEventListener('click', adminAddCoins);
+    document.getElementById('adminVipSilver').addEventListener('click', () => adminGiveVIP(1));
+    document.getElementById('adminVipGold').addEventListener('click', () => adminGiveVIP(2));
+    document.getElementById('adminCaseBtn').addEventListener('click', adminGiveCase);
+    document.getElementById('adminTicketBtn').addEventListener('click', adminGiveTicket);
+    document.getElementById('adminHideBtn').addEventListener('click', adminHide);
+    document.getElementById('adminShowBtn').addEventListener('click', adminShow);
+}
+
+function adminAddCoins() {
+    const nick = document.getElementById('adminNick').value.trim();
+    const amount = parseInt(document.getElementById('adminAmount').value) || 0;
+    if (!nick) return showAdminMsg('Введите ник!');
+    if (amount <= 0) return showAdminMsg('Сумма > 0');
+    const user = getUser(nick);
+    if (!user) return showAdminMsg('Пользователь не найден');
+    user.balance += amount;
+    setUser(nick, user);
+    showAdminMsg(`✅ Выдано ${formatNumber(amount)} монет игроку ${nick}`);
+    renderTop();
+}
+
+function adminGiveVIP(level) {
+    const nick = document.getElementById('adminNick').value.trim();
+    if (!nick) return showAdminMsg('Введите ник!');
+    const user = getUser(nick);
+    if (!user) return showAdminMsg('Пользователь не найден');
+    user.vip = level;
+    setUser(nick, user);
+    showAdminMsg(`✅ Выдан VIP ${level === 1 ? 'Silver' : 'Gold'} игроку ${nick}`);
+}
+
+function adminGiveCase() {
+    const nick = document.getElementById('adminNick').value.trim();
+    if (!nick) return showAdminMsg('Введите ник!');
+    const user = getUser(nick);
+    if (!user) return showAdminMsg('Пользователь не найден');
+    const items = ['👑 Gold VIP', '💰 200000 монет', '⭐ Silver VIP', '🎟️ Билет x3'];
+    const item = items[Math.floor(Math.random() * items.length)];
+    if (item.includes('монет')) {
+        const amount = parseInt(item.replace(/\D/g, '')) || 0;
+        user.balance += amount;
+    } else if (item.includes('Gold')) { user.vip = 2; }
+    else if (item.includes('Silver')) { user.vip = 1; }
+    else if (item.includes('Билет')) { user.tickets = (user.tickets || 0) + 3; }
+    setUser(nick, user);
+    showAdminMsg(`🎁 Выпало: ${item} игроку ${nick}`);
+    renderTop();
+}
+
+function adminGiveTicket() {
+    const nick = document.getElementById('adminNick').value.trim();
+    if (!nick) return showAdminMsg('Введите ник!');
+    const user = getUser(nick);
+    if (!user) return showAdminMsg('Пользователь не найден');
+    user.tickets = (user.tickets || 0) + 1;
+    setUser(nick, user);
+    showAdminMsg(`🎟️ +1 билет игроку ${nick}`);
+}
+
+function adminHide() {
+    const nick = document.getElementById('adminNick').value.trim();
+    if (!nick) return showAdminMsg('Введите ник!');
+    const user = getUser(nick);
+    if (!user) return showAdminMsg('Пользователь не найден');
+    user.hidden = 1;
+    setUser(nick, user);
+    showAdminMsg(`👻 ${nick} скрыт из топа`);
+    renderTop();
+}
+
+function adminShow() {
+    const nick = document.getElementById('adminNick').value.trim();
+    if (!nick) return showAdminMsg('Введите ник!');
+    const user = getUser(nick);
+    if (!user) return showAdminMsg('Пользователь не найден');
+    user.hidden = 0;
+    setUser(nick, user);
+    showAdminMsg(`👻 ${nick} виден в топе`);
+    renderTop();
+}
+
+function showAdminMsg(text) {
+    const el = document.getElementById('adminMsg');
+    el.textContent = text;
+    el.className = 'message';
+    el.classList.remove('hidden');
+    setTimeout(() => el.classList.add('hidden'), 4000);
+}
+
+// ============================================================
+//  ТОП 10
+// ============================================================
+function renderTop() {
+    const db = getDB();
+    const list = Object.keys(db).map(nick => ({ nick, ...db[nick] }));
+    list.sort((a,b) => (b.balance || 0) - (a.balance || 0));
+    const top = list.slice(0, 10);
+    const container = document.getElementById('topList');
+    if (!container) return;
+    if (top.length === 0) { container.innerHTML = '<p style="color:#666;">Нет игроков</p>'; return; }
+    container.innerHTML = top.map((user, i) => {
+        const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i+1}.`;
+        return `<div>${medal} <b>${user.nick}</b> — ${formatNumber(user.balance)} монет ${user.isAdmin ? '👑' : ''}</div>`;
+    }).join('');
+}
+
+// ============================================================
+//  ТУРНИР
+// ============================================================
+let tournamentCooldown = false;
+let tournamentSeconds = 30;
+
+function renderTournament() {
+    const container = document.getElementById('tournamentContent');
+    const cooldownText = tournamentCooldown ? `<div style="color:#ffd700;text-align:center;margin-bottom:10px;">⏳ Подождите ${tournamentSeconds} сек</div>` : '';
+    container.innerHTML = `
+        <div style="margin-bottom:10px;">
+            <p style="color:#888;">Минимальная ставка: 10 000 | Максимальная: 1 000 000</p>
+            ${cooldownText}
+            <div class="input-row">
+                <input type="number" id="tournamentBet" placeholder="Ставка" value="10000" ${tournamentCooldown ? 'disabled' : ''}>
+                <button class="btn btn-gold" id="tournamentStartBtn" ${tournamentCooldown ? 'disabled' : ''}>
+                    🏆 ${tournamentCooldown ? `${tournamentSeconds}с` : 'Начать'}
+                </button>
+            </div>
+        </div>
+        <div id="tournamentResult"></div>
+    `;
+    document.getElementById('tournamentStartBtn').addEventListener('click', function() {
+        if (tournamentCooldown) { showMessage('⏳ Подождите!'); return; }
+        const bet = parseInt(document.getElementById('tournamentBet').value) || 0;
+        if (bet < 10000) return showMessage('❌ Минимальная ставка 10 000');
+        if (bet > 1000000) return showMessage('❌ Максимальная ставка 1 000 000');
+        if (bet > currentData.balance) return showMessage('❌ Не хватает монет!');
+        updateBalance(-bet);
+        const players = [];
+        const botNames = ['Бот1', 'Бот2', 'Бот3', 'Бот4', 'Бот5', 'Бот6', 'Бот7', 'Бот8', 'Бот9'];
+        const playerRoll = Math.floor(Math.random() * 6) + 1;
+        players.push({ name: currentUser, roll: playerRoll, isPlayer: true });
+        for (let i = 0; i < 9; i++) {
+            const roll = Math.floor(Math.random() * 6) + 1;
+            players.push({ name: botNames[i], roll: roll, isPlayer: false });
+        }
+        players.sort((a,b) => b.roll - a.roll);
+        const winner = players[0];
+        const isWin = winner.isPlayer;
+        let resultHTML = `<div style="margin:8px 0;font-weight:bold;text-align:center;">🎲 БРОСОК КУБИКА: ${playerRoll}</div>`;
+        resultHTML += `<div class="tournament-grid">`;
+        players.forEach(p => {
+            const isWinner = p === winner;
+            const cls = isWinner ? 'winner' : (p.isPlayer ? '' : '');
+            const label = p.isPlayer ? '👤' : '🤖';
+            resultHTML += `<div class="tournament-player ${cls}">
+                <span>${label} ${p.name}</span>
+                <span>🎲 ${p.roll}</span>
+            </div>`;
+        });
+        resultHTML += `</div>`;
+        if (isWin) {
+            const winAmount = bet * 10;
+            updateBalance(winAmount);
+            resultHTML += `<div style="text-align:center;color:#ffd700;font-size:1.2rem;margin-top:8px;">🏆 ВЫ ПОБЕДИЛИ! +${formatNumber(winAmount)}</div>`;
+        } else {
+            resultHTML += `<div style="text-align:center;color:#ff3355;font-size:1.2rem;margin-top:8px;">💀 ВЫ ПРОИГРАЛИ! -${formatNumber(bet)}</div>`;
+        }
+        resultHTML += `<div style="text-align:center;color:#888;font-size:0.8rem;margin-top:4px;">Число победителя: ${winner.roll}</div>`;
+        document.getElementById('tournamentResult').innerHTML = resultHTML;
+        tournamentCooldown = true;
+        tournamentSeconds = 30;
+        const btn = document.getElementById('tournamentStartBtn');
+        const input = document.getElementById('tournamentBet');
+        if (btn) { btn.disabled = true; btn.textContent = '⏳ 30с'; }
+        if (input) input.disabled = true;
+        const interval = setInterval(() => {
+            tournamentSeconds--;
+            if (btn) btn.textContent = `⏳ ${tournamentSeconds}с`;
+            if (tournamentSeconds <= 0) {
+                clearInterval(interval);
+                tournamentCooldown = false;
+                renderTournament();
+            }
+        }, 1000);
+    });
+}
+
+// ============================================================
+//  ЗАПУСК
+// ============================================================
+document.querySelectorAll('[data-game]').forEach(btn => btn.addEventListener('click', function() { renderGame(this.dataset.game); }));
+
+if (!loadSession()) { showAuthScreen(); } else { renderApp(); }
+</script>
+</body>
+</html>
